@@ -1,19 +1,5 @@
 #include <iostream>
-#include <stack>
 #include "graph_list.h"
-
-using std::stack;
-
-
-template <typename T>
-void IterativeBackTracking(const list<list<T>> &graph) {
-  stack<T> history;
-  for (auto outer_it = graph.begin(); outer_it != graph.end(); ++outer_it) {
-    for (auto inner_it = (*outer_it).begin(); inner_it != (*outer_it).end();
-         ++inner_it) {
-    }
-  }
-}
 
 int main() {
   GraphList<int> graph_list;
