@@ -3,15 +3,12 @@
 
 int main() {
   GraphList<int> graph_list;
-  graph_list.AddEdge(0, 4);
-  graph_list.AddEdge(0, 3);
-  graph_list.AddEdge(1, 2);
-  graph_list.AddEdge(1, 4);
-  graph_list.AddEdge(1, 5);
-  graph_list.AddEdge(2, 3);
-  graph_list.AddEdge(2, 5);
-  graph_list.AddEdge(5, 3);
-  graph_list.AddEdge(5, 4);
+  vector<int> sources = {0, 0, 1, 1, 1, 2, 2, 5, 5};
+  vector<int> destinations = {4, 3, 2, 4, 5, 3, 5, 3, 4};
+
+  for (int i = 0; i < sources.size(); i++) {
+    graph_list.AddEdge(sources.at(i), destinations.at(i));
+  }
 
   std::cout << graph_list << std::endl;
 }

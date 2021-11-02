@@ -21,7 +21,7 @@ class AdjacencyList {
 
  public:
   AdjacencyList() = default;
-  virtual void AddEdge(T, T) = 0;
+  virtual void AddEdge(T&, T&) = 0;
 
 };
 

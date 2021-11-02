@@ -7,9 +7,11 @@
 
 #include <list>
 #include <stack>
+#include <vector>
 #include "adjacency_list.h"
 
 using std::stack;
+using std::vector;
 using std::list;
 using std::ostream;
 using std::cout;
@@ -28,10 +30,11 @@ class GraphList : public AdjacencyList<T> {
   ~GraphList() = default;
   GraphList &operator=(const GraphList<T> &) = default;
 
-  virtual void AddEdge(T, T);
-  void AddConnection(T, T);
-  Iterator FindVertex(T);
-  void IterativeBackTracking();
+  virtual void AddEdge(T &, T &);
+  void AddConnection(T &, T &);
+  Iterator FindVertex(T &);
+
+  void IterativeBackTracking(T &, T &);
 
   bool Empty() const noexcept;
 
@@ -51,17 +54,19 @@ class GraphList : public AdjacencyList<T> {
 
  private:
   Graph graph_;
+
+  bool StackContainsNode(stack<GraphNode>, const GraphNode&) noexcept;
 };
 
 template<typename T>
-void GraphList<T>::AddEdge(T src, T dest) {
+void GraphList<T>::AddEdge(T &src, T &dest) {
   AddConnection(src, dest);
   AddConnection(dest, src);
 }
 
 template<typename T>
 typename list<typename AdjacencyList<T>::Node>::iterator GraphList<T>::FindVertex(
-    T data) {
+    T &data) {
   for (auto it = graph_.begin(); it != graph_.end(); ++it) {
     if (it->vertex == data) {
       return it;
@@ -70,7 +75,7 @@ typename list<typename AdjacencyList<T>::Node>::iterator GraphList<T>::FindVerte
   return graph_.end();
 }
 template<typename T>
-void GraphList<T>::AddConnection(T src, T dest) {
+void GraphList<T>::AddConnection(T &src, T &dest) {
   auto it = FindVertex(src);
   if (it == graph_.end()) {
     list<T> new_list;
@@ -90,22 +95,34 @@ bool GraphList<T>::Empty() const noexcept {
 }
 
 template<typename T>
-void GraphList<T>::IterativeBackTracking() {
-  stack<Graph> history;
-  list<GraphNode> path;
-  Graph graph;
-  for (auto it = graph_.begin(); it != graph_.end(); ++it) {
-    history.push(*it);
-  }
-
+bool GraphList<T>::StackContainsNode(stack<GraphNode> history,
+                                     const GraphNode &node) noexcept {
   while (!history.empty()) {
-    if (history.top().empty()) {
-      if (!path.empty()) path.pop();
-      history.pop();
-    } else {
-      GraphNode node = history.top().front();
-      history.top().pop_front();
+    GraphNode history_node = history.top();
+    if (node.vertex == history_node.vertex) {
+      return true;
+    }
+    history.pop();
+  }
+  return false;
+}
 
+template<typename T>
+void GraphList<T>::IterativeBackTracking(T &src, T &dest) {
+  vector<vector<T>> paths;
+  stack<GraphNode> history;
+  auto vertex_it = FindVertex(src);
+
+  history.push(*vertex_it);
+  while (!history.empty()) {
+    if (history.top() == dest) {
+
+    } else {
+      for (auto it = history.top().neighbors.begin();
+           it != history.top().neighbors.end(); ++it) {
+
+
+      }
     }
   }
 }
