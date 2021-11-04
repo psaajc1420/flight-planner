@@ -6,124 +6,107 @@
 #define FLIGHT_PLANNER_CMAKE_BUILD_DEBUG_GRAPH_LIST_H_
 
 #include <list>
-#include <stack>
-#include <vector>
 #include "adjacency_list.h"
-
-using std::stack;
-using std::vector;
-using std::list;
-using std::ostream;
-using std::cout;
-using std::endl;
+#include "vertex.h"
 
 template<typename T>
 class GraphList : public AdjacencyList<T> {
 
-  using GraphNode = typename AdjacencyList<T>::Node;
-  using Graph = list<GraphNode>;
-  using Iterator = typename Graph::iterator;
+  using GraphNode = Vertex<T>;
+  using Graph = std::list<GraphNode *>;
+  using GraphIterator = typename Graph::iterator;
 
  public:
   GraphList() = default;
-  GraphList(const GraphList<T> &) = default;
-  ~GraphList() = default;
-  GraphList &operator=(const GraphList<T> &) = default;
+  GraphList(const GraphList<T> &);
+  ~GraphList();
+  GraphList &operator=(const GraphList<T> &);
 
-  virtual void AddEdge(T &, T &);
-  void AddConnection(T &, T &);
-  Iterator FindVertex(T &);
+  virtual void AddEdge(const T &, const T &);
+  void AddConnection(const T &, const T &);
+  GraphIterator FindVertex(const T &);
 
-  void IterativeBackTracking(T &, T &);
-
-  bool Empty() const noexcept;
-
-  friend ostream &operator<<(ostream &os, const GraphList &data) {
+  friend std::ostream &operator<<(std::ostream &os, const GraphList &data) {
     for (auto outer_it = data.graph_.begin(); outer_it != data.graph_.end();
          ++outer_it) {
-      os << outer_it->vertex << " => ";
-      for (auto inner_it = (*outer_it).neighbors.begin();
-           inner_it != (*outer_it).neighbors.end();
+      os << (*outer_it)->GetSource() << " => ";
+      for (auto inner_it = (*outer_it)->GetNeighbors().begin();
+           inner_it != (*outer_it)->GetNeighbors().end();
            ++inner_it) {
         os << *inner_it << " ";
       }
-      os << endl;
+      os << std::endl;
     }
     return os;
   }
 
  private:
-  Graph graph_;
+  void Copy(const GraphList<T> &);
+  void Clear();
 
-  bool StackContainsNode(stack<GraphNode>, const GraphNode&) noexcept;
+  Graph graph_;
 };
 
 template<typename T>
-void GraphList<T>::AddEdge(T &src, T &dest) {
+GraphList<T>::GraphList(const GraphList<T> &graph) {
+  Copy(graph);
+}
+
+template<typename T>
+GraphList<T>::~GraphList() {
+  Clear();
+}
+
+template<typename T>
+GraphList<T> &GraphList<T>::operator=(const GraphList<T> &graph) {
+  if (this != &graph) {
+    Clear();
+    Copy(graph);
+  }
+
+  return *this;
+}
+
+template<typename T>
+void GraphList<T>::AddEdge(const T &src, const T &dest) {
   AddConnection(src, dest);
   AddConnection(dest, src);
 }
 
 template<typename T>
-typename list<typename AdjacencyList<T>::Node>::iterator GraphList<T>::FindVertex(
-    T &data) {
+void GraphList<T>::AddConnection(const T &src, const T &dest) {
+  auto it = FindVertex(src);
+  if (it == graph_.end()) {
+    auto *node = new GraphNode;
+    node->SetSource(src);
+    node->AddNeighbor(dest);
+    graph_.push_back(node);
+  } else {
+    (*it)->AddNeighbor(dest);
+  }
+}
+
+template<typename T>
+typename GraphList<T>::GraphIterator GraphList<T>::FindVertex(const T &data) {
   for (auto it = graph_.begin(); it != graph_.end(); ++it) {
-    if (it->vertex == data) {
+    if ((*it)->GetSource() == data) {
       return it;
     }
   }
   return graph_.end();
 }
+
 template<typename T>
-void GraphList<T>::AddConnection(T &src, T &dest) {
-  auto it = FindVertex(src);
-  if (it == graph_.end()) {
-    list<T> new_list;
-    new_list.push_back(dest);
-    GraphNode node;
-    node.vertex = src;
-    node.neighbors = new_list;
-    graph_.push_back(node);
-  } else {
-    it->neighbors.push_back(dest);
+void GraphList<T>::Copy(const GraphList<T> &graph) {
+  for (auto it = graph.graph_.begin(); it != graph.graph_.end(); ++it) {
+    graph_.push_back(*it);
   }
 }
 
 template<typename T>
-bool GraphList<T>::Empty() const noexcept {
-  return graph_.empty();
-}
-
-template<typename T>
-bool GraphList<T>::StackContainsNode(stack<GraphNode> history,
-                                     const GraphNode &node) noexcept {
-  while (!history.empty()) {
-    GraphNode history_node = history.top();
-    if (node.vertex == history_node.vertex) {
-      return true;
-    }
-    history.pop();
-  }
-  return false;
-}
-
-template<typename T>
-void GraphList<T>::IterativeBackTracking(T &src, T &dest) {
-  vector<vector<T>> paths;
-  stack<GraphNode> history;
-  auto vertex_it = FindVertex(src);
-
-  history.push(*vertex_it);
-  while (!history.empty()) {
-    if (history.top() == dest) {
-
-    } else {
-      for (auto it = history.top().neighbors.begin();
-           it != history.top().neighbors.end(); ++it) {
-
-
-      }
-    }
+void GraphList<T>::Clear() {
+  for (auto it = graph_.begin(); it != graph_.end(); ++it) {
+    delete *it;
   }
 }
 

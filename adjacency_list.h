@@ -8,22 +8,13 @@
 #include <iostream>
 #include <list>
 
-using std::list;
 
 template<typename T>
 class AdjacencyList {
-
- protected:
-  struct Node {
-    T vertex;
-    list<T> neighbors;
-  };
-
  public:
   AdjacencyList() = default;
-  virtual void AddEdge(T&, T&) = 0;
+  virtual void AddEdge(const T &, const T &) = 0;
 
 };
-
 
 #endif //FLIGHT_PLANNER__ADJACENCY_LIST_H_

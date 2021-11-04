@@ -1,5 +1,33 @@
 #include <iostream>
+#include <stack>
+#include <vector>
+
 #include "graph_list.h"
+#include "vertex.h"
+
+using namespace std;
+
+template <typename T>
+vector<vector<T>> IterativeBackTracking(const T &src, const T &dest) {
+  vector<vector<T>> paths;
+  stack<Vertex<T>> history;
+  auto vertex_it = FindVertex(src);
+
+  history.push(*vertex_it);
+  while (!history.empty()) {
+    if (history.top() == dest) {
+
+    } else {
+      for (auto it = history.top().neighbors.begin();
+           it != history.top().neighbors.end(); ++it) {
+
+
+      }
+    }
+  }
+
+  return paths;
+}
 
 int main() {
   GraphList<int> graph_list;
