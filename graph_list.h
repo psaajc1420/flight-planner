@@ -14,9 +14,10 @@ class GraphList : public AdjacencyList<T> {
 
   using GraphNode = Vertex<T>;
   using Graph = std::list<GraphNode *>;
-  using GraphIterator = typename Graph::iterator;
 
  public:
+  using GraphIterator = typename Graph::iterator;
+
   GraphList() = default;
   GraphList(const GraphList<T> &);
   ~GraphList();
@@ -25,6 +26,10 @@ class GraphList : public AdjacencyList<T> {
   virtual void AddEdge(const T &, const T &);
   void AddConnection(const T &, const T &);
   GraphIterator FindVertex(const T &);
+  inline void InitIterators();
+
+  GraphIterator Begin();
+  GraphIterator End();
 
   friend std::ostream &operator<<(std::ostream &os, const GraphList &data) {
     for (auto outer_it = data.graph_.begin(); outer_it != data.graph_.end();
@@ -77,7 +82,7 @@ template<typename T>
 void GraphList<T>::AddConnection(const T &src, const T &dest) {
   auto it = FindVertex(src);
   if (it == graph_.end()) {
-    auto *node = new GraphNode;
+    auto node = new GraphNode;
     node->SetSource(src);
     node->AddNeighbor(dest);
     graph_.push_back(node);
@@ -89,7 +94,8 @@ void GraphList<T>::AddConnection(const T &src, const T &dest) {
 template<typename T>
 typename GraphList<T>::GraphIterator GraphList<T>::FindVertex(const T &data) {
   for (auto it = graph_.begin(); it != graph_.end(); ++it) {
-    if ((*it)->GetSource() == data) {
+    if (*static_cast<const T &>((*it)->GetSource())
+        == *static_cast<const T &>(data)) {
       return it;
     }
   }
@@ -108,6 +114,23 @@ void GraphList<T>::Clear() {
   for (auto it = graph_.begin(); it != graph_.end(); ++it) {
     delete *it;
   }
+}
+
+template<typename T>
+void GraphList<T>::InitIterators() {
+  for (auto it = graph_.begin(); it != graph_.end(); ++it) {
+    (*it)->InitIterator();
+  }
+}
+
+template<typename T>
+typename GraphList<T>::GraphIterator GraphList<T>::Begin() {
+  return graph_.begin();
+}
+
+template<typename T>
+typename GraphList<T>::GraphIterator GraphList<T>::End() {
+  return graph_.end();
 }
 
 #endif //FLIGHT_PLANNER_CMAKE_BUILD_DEBUG_GRAPH_LIST_H_
