@@ -8,12 +8,11 @@
 #include <iostream>
 #include <list>
 
-
 template<typename T>
 class AdjacencyList {
  public:
   AdjacencyList() = default;
-  virtual void AddEdge(const T &,const T &) = 0;
+  virtual void AddEdge(const T &, const T &) = 0;
 };
 
 #endif //FLIGHT_PLANNER__ADJACENCY_LIST_H_

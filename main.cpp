@@ -18,14 +18,14 @@ struct City {
   City() = default;
   explicit City(string name) : name_{name} {}
   explicit City(string name, int cost, int price, string airline)
-    : name_{name}, price_{price}, cost_{cost}, airline_{airline} {}
+      : name_{name}, price_{price}, cost_{cost}, airline_{airline} {}
 
   bool operator==(const City &rhs) const {
     return this->name_ == rhs.name_;
   }
 };
 
-void printItinerary(stack<Vertex<City*> *>& stack) {
+void printItinerary(stack<Vertex<City *> *> &stack) {
   if (stack.empty()) return;
 
   string city = stack.top()->GetSource()->name_;
@@ -34,7 +34,6 @@ void printItinerary(stack<Vertex<City*> *>& stack) {
   printItinerary(stack);
   cout << city << " ";
 }
-
 
 template<typename T>
 bool contains(stack<Vertex<T> *> &path, const T &source) {
