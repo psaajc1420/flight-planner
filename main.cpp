@@ -17,31 +17,36 @@ struct City {
   string airline_;
   City() = default;
   explicit City(string name) : name_{name} {}
-  explicit City(string name, int cost, int price, string airline)
+  City(string name, int cost, int price, string airline)
       : name_{name}, price_{price}, cost_{cost}, airline_{airline} {}
 
   bool operator==(const City &rhs) const {
-    return this->name_ == rhs.name_;
+    return name_ == rhs.name_;
+  }
+
+  friend std::ostream &operator<<(std::ostream &os, const City &city) {
+    os << city.name_ << "(" << city.airline_ << ") ";
+    return os;
   }
 };
 
-void printItinerary(stack<Vertex<City *> *> &stack) {
+void PrintItinerary(stack<Vertex<City> *> &stack) {
   if (stack.empty()) return;
 
-  string city = stack.top()->GetSource()->name_;
+  City city = stack.top()->GetSource();
 
   stack.pop();
-  printItinerary(stack);
-  cout << city << " ";
+  PrintItinerary(stack);
+  cout << city.name_ << "(" << city.airline_ << ") ";
 }
 
 template<typename T>
-bool contains(stack<Vertex<T> *> &path, const T &source) {
+bool contains(stack<Vertex<T> *> &path, Vertex<T>* source) {
   stack<Vertex<T> *> temp;
 
   bool found = false;
   while (!path.empty()) {
-    if (*path.top()->GetSource() == *source) found = true;
+    if (*path.top() == *source) found = true;
     temp.push(path.top());
     path.pop();
   }
@@ -63,6 +68,7 @@ vector<stack<Vertex<T> *>> IterativeBackTracking(GraphList<T> &graph,
 
   auto sourceItr = graph.FindVertex(src);
   auto destinationItr = graph.FindVertex(dest);
+
   path.push(*sourceItr);
   graph.InitIterators();
   while (!path.empty()) {
@@ -70,16 +76,18 @@ vector<stack<Vertex<T> *>> IterativeBackTracking(GraphList<T> &graph,
       paths.push_back(path);
       path.pop();
     } else {
-      auto it = path.top()->GetIterator();
+      auto it = graph.FindVertex(path.top()->GetSource());
 
-      if (it == path.top()->GetNeighbors().end()) {
-        path.top()->InitIterator();
+      auto temp = (*it)->GetIterator();
+
+      if (temp == (*it)->GetNeighbors().end()) {
+        (*it)->InitIterator();
         path.pop();
       } else if (contains(path, *it)) {
-        path.top()->IncrementIterator();
+        (*it)->IncrementIterator();
       } else {
-        path.top()->IncrementIterator();
-        path.push(*graph.FindVertex(*it));
+        (*it)->IncrementIterator();
+        path.push(*it);
       }
     }
   }
@@ -90,46 +98,35 @@ vector<stack<Vertex<T> *>> IterativeBackTracking(GraphList<T> &graph,
 int main() {
 
   srand(time(nullptr));
-  GraphList<City *> graph_list;
-  vector<string> sources = {"Dallas", "Austin", "Dallas", "Austin"};
-  vector<string> destinations = {"Austin", "Houston", "Houston", "Chicago"};
-
-  vector<City *> cities;
+  GraphList<City> graph_list;
+  vector<string> sources = {"Dallas", "Dallas", "Austin", "Dallas", "Austin"};
+  vector<string>
+      destinations = {"Austin", "Austin", "Houston", "Houston", "Chicago"};
+  vector<string>
+      airlines = {"Spirit", "American", "United", "Spirit", "American"};
 
   for (int i = 0; i < sources.size(); i++) {
 
     int price = rand() % 300;
     int cost = rand() % 300;
-    string airline = "Southwest";
-    City *source_city = new City(sources.at(i), price, cost, airline);
-    City *destination_city =
-        new City(destinations.at(i), price, cost, airline);
+    string airline = airlines[i];
+    City source_city(sources.at(i), price, cost, airline);
+    City destination_city(destinations.at(i), price, cost, airline);
     graph_list.AddEdge(source_city, destination_city);
-    cities.push_back(source_city);
-    cities.push_back(destination_city);
-  }
-//  std::cout << graph_list << std::endl;
 
-  for (auto it = graph_list.Begin(); it != graph_list.End(); ++it) {
-    cout << (*it)->GetSource()->name_ << endl;
   }
 
-  City *source = new City("Dallas");
-  City *destination = new City("Houston");
+  cout << graph_list << endl;
 
-  vector<stack<Vertex<City *> *>>
+  City source("Dallas");
+  City destination("Houston");
+
+  vector<stack<Vertex<City> *>>
       itineraries = IterativeBackTracking(graph_list, source, destination);
 
   for (auto it = itineraries.begin(); it != itineraries.end(); ++it) {
-    printItinerary(*it);
+    PrintItinerary(*it);
     cout << endl;
-  }
-
-  delete source;
-  delete destination;
-
-  for (auto it = cities.begin(); it != cities.end(); ++it) {
-    delete *it;
   }
 
   return 0;

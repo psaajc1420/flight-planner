@@ -8,12 +8,16 @@
 #include <list>
 #include "adjacency_list.h"
 #include "vertex.h"
+#include "source_vertex.h"
+#include "destination_vertex.h"
 
 template<typename T>
 class GraphList : public AdjacencyList<T> {
 
+  using SourceNode = SourceVertex<T>;
+  using DestinationNode = DestinationVertex<T>;
   using GraphNode = Vertex<T>;
-  using Graph = std::list<GraphNode *>;
+  using Graph = std::list<SourceNode *>;
 
  public:
   using GraphIterator = typename Graph::iterator;
@@ -27,7 +31,6 @@ class GraphList : public AdjacencyList<T> {
   void AddConnection(const T &, const T &);
   GraphIterator FindVertex(const T &);
   inline void InitIterators();
-
   GraphIterator Begin();
   GraphIterator End();
 
@@ -35,10 +38,11 @@ class GraphList : public AdjacencyList<T> {
     for (auto outer_it = data.graph_.begin(); outer_it != data.graph_.end();
          ++outer_it) {
       os << (*outer_it)->GetSource() << " => ";
-      for (auto inner_it = (*outer_it)->GetNeighbors().begin();
-           inner_it != (*outer_it)->GetNeighbors().end();
+      SourceNode * vertex = *outer_it;
+      for (auto inner_it = vertex->GetNeighbors().begin();
+           inner_it != vertex->GetNeighbors().end();
            ++inner_it) {
-        os << *inner_it << " ";
+        os << **inner_it << " ";
       }
       os << std::endl;
     }
@@ -81,21 +85,23 @@ void GraphList<T>::AddEdge(const T &src, const T &dest) {
 template<typename T>
 void GraphList<T>::AddConnection(const T &src, const T &dest) {
   auto it = FindVertex(src);
+
+  auto destination_node = new DestinationNode;
+  destination_node->SetSource(dest);
   if (it == graph_.end()) {
-    auto node = new GraphNode;
-    node->SetSource(src);
-    node->AddNeighbor(dest);
-    graph_.push_back(node);
+    auto source_node = new SourceNode;
+    source_node->SetSource(src);
+    source_node->AddNeighbor(destination_node);
+    graph_.push_back(source_node);
   } else {
-    (*it)->AddNeighbor(dest);
+    (*it)->AddNeighbor(destination_node);
   }
 }
 
 template<typename T>
 typename GraphList<T>::GraphIterator GraphList<T>::FindVertex(const T &data) {
   for (auto it = graph_.begin(); it != graph_.end(); ++it) {
-    if (*static_cast<const T &>((*it)->GetSource())
-        == *static_cast<const T &>(data)) {
+    if ((*it)->GetSource() == data) {
       return it;
     }
   }
@@ -104,15 +110,28 @@ typename GraphList<T>::GraphIterator GraphList<T>::FindVertex(const T &data) {
 
 template<typename T>
 void GraphList<T>::Copy(const GraphList<T> &graph) {
-  for (auto it = graph.graph_.begin(); it != graph.graph_.end(); ++it) {
-    graph_.push_back(*it);
+
+  for (auto it = graph_.begin(); it != graph_.end(); ++it) {
+    auto source_node = new SourceNode;
+    source_node->SetSource((*it)->GetSource());
+    for (auto neighbor_it = (*it)->GetNeighbors().begin();
+         neighbor_it != (*it)->GetNeighbors().end(); ++neighbor_it) {
+      auto destination_node = new DestinationNode;
+      destination_node->SetSource((*neighbor_it)->GetSource());
+      source_node->AddNeighbor(destination_node);
+    }
   }
 }
 
 template<typename T>
 void GraphList<T>::Clear() {
   for (auto it = graph_.begin(); it != graph_.end(); ++it) {
-    delete *it;
+    SourceNode* source_node = *it;
+    for (auto neighbor_it = source_node->GetNeighbors().begin();
+         neighbor_it != source_node->GetNeighbors().end(); ++neighbor_it) {
+      delete *neighbor_it;
+    }
+    delete source_node;
   }
 }
 

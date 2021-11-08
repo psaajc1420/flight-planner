@@ -3,4 +3,4 @@ project(flight_planner)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(flight_planner main.cpp adjacency_list.h graph_list.h vertex.h)
+add_executable(flight_planner main.cpp adjacency_list.h graph_list.h vertex.h source_vertex.h destination_vertex.h)
