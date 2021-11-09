@@ -5,6 +5,7 @@
 #ifndef FLIGHT_PLANNER_CMAKE_BUILD_DEBUG_GRAPH_LIST_H_
 #define FLIGHT_PLANNER_CMAKE_BUILD_DEBUG_GRAPH_LIST_H_
 
+#include <iostream>
 #include <list>
 #include "adjacency_list.h"
 #include "vertex.h"
@@ -16,11 +17,11 @@ class GraphList : public AdjacencyList<T> {
 
   using SourceNode = SourceVertex<T>;
   using DestinationNode = DestinationVertex<T>;
-  using GraphNode = Vertex<T>;
   using Graph = std::list<SourceNode *>;
 
  public:
   using GraphIterator = typename Graph::iterator;
+  using ConstGraphIterator = typename Graph::const_iterator;
 
   GraphList() = default;
   GraphList(const GraphList<T> &);
@@ -33,12 +34,13 @@ class GraphList : public AdjacencyList<T> {
   inline void InitIterators();
   GraphIterator Begin();
   GraphIterator End();
+  ConstGraphIterator CBegin() const;
+  ConstGraphIterator CEnd() const;
 
-  friend std::ostream &operator<<(std::ostream &os, const GraphList &data) {
-    for (auto outer_it = data.graph_.begin(); outer_it != data.graph_.end();
-         ++outer_it) {
+  friend std::ostream &operator<<(std::ostream &os, const GraphList<T> &data) {
+    for (auto outer_it = data.CBegin(); outer_it != data.CEnd(); ++outer_it) {
       os << (*outer_it)->GetSource() << " => ";
-      SourceNode * vertex = *outer_it;
+      SourceNode *vertex = *outer_it;
       for (auto inner_it = vertex->GetNeighbors().begin();
            inner_it != vertex->GetNeighbors().end();
            ++inner_it) {
@@ -126,7 +128,7 @@ void GraphList<T>::Copy(const GraphList<T> &graph) {
 template<typename T>
 void GraphList<T>::Clear() {
   for (auto it = graph_.begin(); it != graph_.end(); ++it) {
-    SourceNode* source_node = *it;
+    SourceNode *source_node = *it;
     for (auto neighbor_it = source_node->GetNeighbors().begin();
          neighbor_it != source_node->GetNeighbors().end(); ++neighbor_it) {
       delete *neighbor_it;
@@ -150,6 +152,16 @@ typename GraphList<T>::GraphIterator GraphList<T>::Begin() {
 template<typename T>
 typename GraphList<T>::GraphIterator GraphList<T>::End() {
   return graph_.end();
+}
+
+template<typename T>
+typename GraphList<T>::ConstGraphIterator GraphList<T>::CBegin() const {
+  return graph_.cbegin();
+}
+
+template<typename T>
+typename GraphList<T>::ConstGraphIterator GraphList<T>::CEnd() const {
+  return graph_.cend();
 }
 
 #endif //FLIGHT_PLANNER_CMAKE_BUILD_DEBUG_GRAPH_LIST_H_

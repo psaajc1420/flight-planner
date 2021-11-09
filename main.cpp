@@ -12,13 +12,11 @@ using namespace std;
 
 struct City {
   string name_;
-  int price_;
-  int cost_;
   string airline_;
   City() = default;
   explicit City(string name) : name_{name} {}
-  City(string name, int cost, int price, string airline)
-      : name_{name}, price_{price}, cost_{cost}, airline_{airline} {}
+  City(string name, string airline)
+      : name_{name}, airline_{airline} {}
 
   bool operator==(const City &rhs) const {
     return name_ == rhs.name_;
@@ -41,7 +39,7 @@ void PrintItinerary(stack<Vertex<City> *> &stack) {
 }
 
 template<typename T>
-bool contains(stack<Vertex<T> *> &path, Vertex<T>* source) {
+bool contains(stack<Vertex<T> *> &path, Vertex<T> *source) {
   stack<Vertex<T> *> temp;
 
   bool found = false;
@@ -72,21 +70,21 @@ vector<stack<Vertex<T> *>> IterativeBackTracking(GraphList<T> &graph,
   path.push(*sourceItr);
   graph.InitIterators();
   while (!path.empty()) {
-    if (path.top() == *destinationItr) {
+    if (*path.top() == **destinationItr) {
       paths.push_back(path);
       path.pop();
     } else {
-      auto it = graph.FindVertex(path.top()->GetSource());
+      auto source_it = graph.FindVertex(path.top()->GetSource());
 
-      auto temp = (*it)->GetIterator();
+      auto it = (*source_it)->GetIterator();
 
-      if (temp == (*it)->GetNeighbors().end()) {
-        (*it)->InitIterator();
+      if (it == (*source_it)->GetNeighbors().end()) {
+        (*source_it)->InitIterator();
         path.pop();
       } else if (contains(path, *it)) {
-        (*it)->IncrementIterator();
+        (*source_it)->IncrementIterator();
       } else {
-        (*it)->IncrementIterator();
+        (*source_it)->IncrementIterator();
         path.push(*it);
       }
     }
@@ -110,8 +108,8 @@ int main() {
     int price = rand() % 300;
     int cost = rand() % 300;
     string airline = airlines[i];
-    City source_city(sources.at(i), price, cost, airline);
-    City destination_city(destinations.at(i), price, cost, airline);
+    City source_city(sources.at(i), airline);
+    City destination_city(destinations.at(i), airline);
     graph_list.AddEdge(source_city, destination_city);
 
   }

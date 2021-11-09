@@ -19,11 +19,11 @@ class Vertex {
   virtual const T &GetSource() const = 0;
   virtual void SetSource(T source) = 0;
 
-  friend bool operator==(const Vertex<T>& lhs, const Vertex& rhs) {
+  friend bool operator==(const Vertex<T> &lhs, const Vertex<T> &rhs) {
     return lhs.source_ == rhs.source_;
   }
 
-  friend std::ostream &operator<<(std::ostream &os, const Vertex &vertex) {
+  friend std::ostream &operator<<(std::ostream &os, const Vertex<T> &vertex) {
     os << vertex.source_;
     return os;
   }
