@@ -3,8 +3,6 @@
 #include <iostream>
 #include <stack>
 #include <vector>
-#include <typeinfo>
-
 #include "graph_list.h"
 #include "vertex.h"
 
@@ -39,22 +37,14 @@ void PrintItinerary(stack<Vertex<City> *> &stack) {
 }
 
 template<typename T>
-bool contains(stack<Vertex<T> *> &path, Vertex<T> *source) {
-  stack<Vertex<T> *> temp;
+bool contains(stack<Vertex<T> *> path, Vertex<T> *source) {
 
-  bool found = false;
   while (!path.empty()) {
-    if (*path.top() == *source) found = true;
-    temp.push(path.top());
+    if (*path.top() == *source) return true;
     path.pop();
   }
 
-  while (!temp.empty()) {
-    path.push(temp.top());
-    temp.pop();
-  }
-
-  return found;
+  return false;
 }
 
 template<typename T>
@@ -104,9 +94,6 @@ int main() {
       airlines = {"Spirit", "American", "United", "Spirit", "American"};
 
   for (int i = 0; i < sources.size(); i++) {
-
-    int price = rand() % 300;
-    int cost = rand() % 300;
     string airline = airlines[i];
     City source_city(sources.at(i), airline);
     City destination_city(destinations.at(i), airline);

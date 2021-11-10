@@ -14,7 +14,7 @@ class DestinationVertex : public Vertex<T> {
  public:
   DestinationVertex() = default;
   DestinationVertex(const DestinationVertex<T> &) = default;
-  ~DestinationVertex() = default;
+  ~DestinationVertex() override = default;
   DestinationVertex &operator=(const DestinationVertex<T> &) = default;
   explicit DestinationVertex(T source) : Vertex<T>(source) {};
 
